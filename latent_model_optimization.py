@@ -7,7 +7,8 @@ class LatentModelOptimizer:
 
     def __init__(self, init_hidden_vars, init_params):
         self.hidden_vars = list(init_hidden_vars)
-        self.params = list(init_params)
+        self.params = None
+        self.set_params(list(init_params))
 
     def latent_model(self, hidden_vars, params):
         """
@@ -28,6 +29,9 @@ class LatentModelOptimizer:
             Hessian observation.
         """
         pass
+
+    def set_params(self, params):
+        self.params = params
 
     def model(self, params):
         return self.latent_model(self.hidden_vars, params)
@@ -81,7 +85,7 @@ class LatentModelOptimizer:
 
             if not results.success:
                 print "model minimization warning: " + results.message
-            self.params = results.x
+            self.set_params(list(results.x))
             print str(i) + "th iteration: minimum is " + str(results.fun)
 
             res = self.functional_residual(self.hidden_vars)
@@ -97,7 +101,7 @@ class LatentModelOptimizer:
         def loss_function(hidden_vars):
             loss = 0
             for sample in sample_parameters:
-                self.params = sample
+                self.set_params(list(sample))
                 loss += self.functional_residual(hidden_vars)
 
             return loss
@@ -105,7 +109,7 @@ class LatentModelOptimizer:
         def loss_function_jac(hidden_vars):
             jac_ = np.ndarray(shape=[1, 2])
             for sample in sample_parameters:
-                self.params = sample
+                self.set_params(list(sample))
                 jac_ += self.functional_residual_jac(hidden_vars)
 
             return jac_
