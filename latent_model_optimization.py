@@ -1,4 +1,4 @@
-from scipy.optimize import minimize
+from scipy.optimize import minimize, least_squares
 import math
 import numpy as np
 
@@ -51,12 +51,15 @@ class LatentModelOptimizer:
         :param hidden_vars:
         :return:
         """
-        return np.power(np.abs(self.functional(hidden_vars) - self.observe(self.params)), 2)
+        return self.functional(hidden_vars) - self.observe(self.params)
+
+    def functional_residual_square(self, hidden_vars):
+        return self.functional_residual(hidden_vars) ** 2
 
     def functional_jac(self, hidden_vars):
         raise NotImplementedError
 
-    def functional_residual_jac(self, hidden_vars):
+    def functional_residual_square_jac(self, hidden_vars):
         return self.functional_jac(hidden_vars) * (self.functional(hidden_vars) - self.observe(self.params)) * 2
 
     def optimize(self, method=None, jac=False, bounds_params=None, bounds_hidden_vars=None, tol=1E-16, max_iter=100):
@@ -65,10 +68,11 @@ class LatentModelOptimizer:
 
             # estimate the model
             if not jac:
-                results = minimize(self.functional_residual, self.hidden_vars, method=method, jac=False,
+                results = minimize(self.functional_residual_square, self.hidden_vars, method=method, jac=False,
                                    bounds=bounds_hidden_vars, tol=1E-16)
             else:
-                results = minimize(self.functional_residual, self.hidden_vars, method=method, jac=self.functional_residual_jac,
+                results = minimize(self.functional_residual_square, self.hidden_vars, method=method,
+                                   jac=self.functional_residual_square_jac,
                                    bounds=bounds_hidden_vars, tol=1E-16)
 
             if not results.success:
@@ -79,16 +83,18 @@ class LatentModelOptimizer:
 
             # minimize the estimated model
             if not jac:
-                results = minimize(self.model, self.params, method=method, jac=False, bounds=bounds_params, tol=1E-16)
+                results = minimize(self.model, self.params, method=method, jac=False,
+                                   bounds=bounds_params, tol=1E-16)
             else:
-                results = minimize(self.model, self.params, method=method, jac=self.model_jac, bounds=bounds_params, tol=1E-16)
+                results = minimize(self.model, self.params, method=method, jac=self.model_jac,
+                                   bounds=bounds_params, tol=1E-16)
 
             if not results.success:
                 print "model minimization warning: " + results.message
             self.set_params(list(results.x))
             print str(i) + "th iteration: minimum is " + str(results.fun)
 
-            res = self.functional_residual(self.hidden_vars)
+            res = self.functional_residual_square(self.hidden_vars)
             print str(i) + "th iteration: residual is " + str(res)
             if res < tol:
                 pass
@@ -102,7 +108,7 @@ class LatentModelOptimizer:
             loss = 0
             for sample in sample_parameters:
                 self.set_params(list(sample))
-                loss += self.functional_residual(hidden_vars)
+                loss += self.functional_residual_square(hidden_vars)
 
             return loss
 
@@ -110,7 +116,7 @@ class LatentModelOptimizer:
             jac_ = np.ndarray(shape=[1, 2])
             for sample in sample_parameters:
                 self.set_params(list(sample))
-                jac_ += self.functional_residual_jac(hidden_vars)
+                jac_ += self.functional_residual_square_jac(hidden_vars)
 
             return jac_
 
