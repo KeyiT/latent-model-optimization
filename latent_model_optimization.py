@@ -20,16 +20,6 @@ class LatentModelOptimizer:
         """
         raise NotImplementedError
 
-    def latent_model_hes(self, hidden_vars, params):
-        """
-
-        :param hidden_vars: list
-        :param params: list
-        :return: int, array-like
-            Hessian observation.
-        """
-        pass
-
     def set_params(self, params):
         self.params = params
 
@@ -37,6 +27,9 @@ class LatentModelOptimizer:
         return self.latent_model(self.hidden_vars, params)
 
     def model_jac(self, params):
+        pass
+
+    def model_hes(self, params):
         pass
 
     def functional(self, hidden_vars):
@@ -59,21 +52,25 @@ class LatentModelOptimizer:
     def functional_jac(self, hidden_vars):
         raise NotImplementedError
 
+    def functional_hes(self, hidden_vars):
+        raise NotImplementedError
+
     def functional_residual_square_jac(self, hidden_vars):
         return self.functional_jac(hidden_vars) * (self.functional(hidden_vars) - self.observe(self.params)) * 2
 
-    def optimize(self, method=None, jac=False, bounds_params=None, bounds_hidden_vars=None, tol=1E-16, max_iter=100):
+    def optimize(self, method=None, jac=False, hes=None, bounds_params=None, bounds_hidden_vars=None, tol=1E-16, max_iter=100):
 
         for i in xrange(0, max_iter):
 
             # estimate the model
             if not jac:
-                results = minimize(self.functional_residual_square, self.hidden_vars, method=method, jac=False,
-                                   bounds=bounds_hidden_vars, tol=1E-16)
+                results = least_squares(self.functional_residual, [0.5, 0.5],
+                                        verbose=2, method='dogbox', bounds=bounds_hidden_vars,
+                                        ftol=3e-16, xtol=3e-16, gtol=3e-16)
             else:
-                results = minimize(self.functional_residual_square, self.hidden_vars, method=method,
-                                   jac=self.functional_residual_square_jac,
-                                   bounds=bounds_hidden_vars, tol=1E-16)
+                results = least_squares(self.functional_residual, [0.5, 0.5], jac=self.functional_jac,
+                                        verbose=2, method='dogbox', bounds=bounds_hidden_vars,
+                                        ftol=3e-16, xtol=3e-16, gtol=3e-16)
 
             if not results.success:
                 print "model estimation warning: " + results.message
@@ -84,10 +81,10 @@ class LatentModelOptimizer:
             # minimize the estimated model
             if not jac:
                 results = minimize(self.model, self.params, method=method, jac=False,
-                                   bounds=bounds_params, tol=1E-16)
+                                   hess=hes, bounds=bounds_params, tol=1E-16)
             else:
                 results = minimize(self.model, self.params, method=method, jac=self.model_jac,
-                                   bounds=bounds_params, tol=1E-16)
+                                   hess=hes, bounds=bounds_params, tol=1E-16)
 
             if not results.success:
                 print "model minimization warning: " + results.message
@@ -100,40 +97,41 @@ class LatentModelOptimizer:
                 pass
                 # break
 
+            print self.hidden_vars
+            print self.params
+
             self.validate_model()
 
     def train(self, sample_parameters, method=None, jac=False, bounds=None, max_iter=1, tol=1E-10):
 
         def loss_function(hidden_vars):
-            loss = 0
+            loss = []
             for sample in sample_parameters:
                 self.set_params(list(sample))
-                loss += self.functional_residual_square(hidden_vars)
+                loss.append(self.functional_residual(hidden_vars))
 
             return loss
 
         def loss_function_jac(hidden_vars):
-            jac_ = np.ndarray(shape=[1, 2])
+            jac_ = []
             for sample in sample_parameters:
                 self.set_params(list(sample))
-                jac_ += self.functional_residual_square_jac(hidden_vars)
+                tmp = self.functional_jac(hidden_vars)
+                jac_.append([tmp[0][0], tmp[0][1]])
 
             return jac_
 
-        for i in xrange(0, max_iter):
-            if not jac:
-                results = minimize(loss_function,
-                                   self.hidden_vars, jac=False,
-                                   method=method, bounds=bounds, tol=tol)
+        if not jac:
+            results = least_squares(loss_function, [0.5, 0.5],
+                                    verbose=2, method=method, bounds=bounds, ftol=3e-16, xtol=3e-16, gtol=3e-16)
 
-            else:
-                results = minimize(loss_function,
-                                   self.hidden_vars, jac=loss_function_jac,
-                                   method=method, bounds=bounds, tol=tol)
+        else:
+            results = least_squares(loss_function, [0.5, 0.5],
+                                    jac=loss_function_jac, verbose=2,
+                                    method=method, bounds=bounds, ftol=3e-16, xtol=3e-16, gtol=3e-16)
 
-            print results.message
-            self.hidden_vars = results.x
-            print str(i) + "th iteration: average functional residual is " + str(results.fun / len(sample_parameters))
+        print results.message
+        self.hidden_vars = results.x
 
         self.validate_model()
 
