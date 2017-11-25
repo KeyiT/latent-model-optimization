@@ -6,6 +6,8 @@ import math
 import sympy as sym
 from sympy.utilities.lambdify import lambdify
 
+from pylab import *
+
 
 class MingLeiModel(LatentModelOptimizer):
 
@@ -38,9 +40,9 @@ class MingLeiModel(LatentModelOptimizer):
             jac_params_sym_, modules='numpy')
 
         # test lambda function of jacobins
-        print self._jac_params(0.1, 0.1, 0.1, 0.1)
-        print self._jac_hidden(0.1, 0.1, 0.1, 0.1)
-        print self._hes_params(0.1, 0.1, 0.1, 0.1)
+        print(self._jac_params(0.1, 0.1, 0.1, 0.1))
+        print(self._jac_hidden(0.1, 0.1, 0.1, 0.1))
+        print(self._hes_params(0.1, 0.1, 0.1, 0.1))
 
         # generate lambda function of latent model
         h1, h2 = sym.symbols('h1, h2', real=True)
@@ -212,7 +214,7 @@ class MingLeiModel(LatentModelOptimizer):
         return self._hes_params(h1, h2, theta1, theta2)
 
 
-target_hidden_vars = [0.1, 0.6*math.pi]
+target_hidden_vars = [0.1, 0.3*math.pi]
 model = MingLeiModel([0.5, 0.5], [0.5, 0.5])
 
 
@@ -226,33 +228,52 @@ for sample1 in sample_params1:
 
 model.train(sample_parameters=sample_params, bounds=([0, 0], [1, 2 * math.pi]),
             method='dogbox', jac=True)
-print "\nhidden variables:"
-print model.hidden_vars
-print "target hidden variables:"
-print target_hidden_vars
+print("\nhidden variables:")
+print(model.hidden_vars)
+print("target hidden variables:")
+print(target_hidden_vars)
 
 # find minimum
 results = minimize(model.model,
-                   np.ndarray(shape=[2], buffer=np.array([0.1, 0.1])),
+                   np.ndarray(shape=[2], buffer=np.array([np.pi, np.pi])),
                    method='Newton-CG', jac=model.model_jac, hess=model.model_hes, tol=1E-16
                    )
-print results.message
-print "model parameters:"
-print model.params
-print "minimum:"
-print results.fun
+model.params = results.x
+print(results.message)
+print("model parameters:")
+print(model.params)
+print("minimum:")
+print(results.fun)
 
 model.hidden_vars = target_hidden_vars
 results = minimize(model.model,
-                   np.ndarray(shape=[2], buffer=np.array([0.1, 0.1])),
+                   np.ndarray(shape=[2], buffer=np.array([np.pi, np.pi])),
                    method='Newton-CG', jac=model.model_jac, hess=model.model_hes, tol=1E-16
                    )
-print results.message
-print "target model parameters:"
-print results.x
-print "target minimum:"
-print results.fun
+print(results.message)
+print("target model parameters:")
+print(results.x)
+print("target minimum:")
+print(results.fun)
 
+
+
+import matplotlib.pyplot as plt
+
+sample_params1 = np.linspace(0, math.pi*2, 50)
+sample_params2 = np.linspace(0, math.pi*2, 50)
+model.hidden_vars = target_hidden_vars
+X, Y = meshgrid(sample_params1, sample_params2)
+Z = []
+for i in range(0, len(X)):
+    Z.append(model.observe([X[i], Y[i]]))
+
+
+figure()
+fig, ax = subplots()
+p = ax.contourf(X, Y, Z)
+cb = fig.colorbar(p)
+plt.savefig('fig1.pdf')
 """
 
 
@@ -264,30 +285,30 @@ model.optimize(max_iter=100,
                method='trust-ncg',
                bounds_hidden_vars=([0, 0], [1, 2*math.pi]))
 
-print "\nhidden variables:"
-print model.hidden_vars
-print "target hidden variables:"
-print target_hidden_vars
+print("\nhidden variables:"
+print(model.hidden_vars
+print("target hidden variables:"
+print(target_hidden_vars
 
 
 # results = minimize(model.model, model.params, jac=model.model_jac, bounds=((0, 2*math.pi), (0, 2*math.pi)))
-#print results.message
-print "model parameters:"
-print model.params
-print "minimum:"
-print model.latent_model(model.hidden_vars, model.params)
+#print(results.message
+print("model parameters:"
+print(model.params
+print("minimum:"
+print(model.latent_model(model.hidden_vars, model.params)
 
 model.hidden_vars = target_hidden_vars
 
-print model.model_jac([0.1, 0.1]).shape
+print(model.model_jac([0.1, 0.1]).shape
 results = minimize(model.model,
                    np.ndarray(shape=[2], buffer=np.array([1.5, 1.5])), hess=model.model_hes,
                    method='Newton-CG', tol=1E-21, jac=model.model_jac
                    )
-print results.message
-print "model parameters:"
-print "target model parameters:"
-print results.x
-print "target minimum:"
-print results.fun
+print(results.message
+print("model parameters:"
+print("target model parameters:"
+print(results.x
+print("target minimum:"
+print(results.fun
 """

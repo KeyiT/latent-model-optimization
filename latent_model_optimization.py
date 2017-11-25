@@ -60,7 +60,7 @@ class LatentModelOptimizer:
 
     def optimize(self, method=None, jac=False, hes=None, bounds_params=None, bounds_hidden_vars=None, tol=1E-16, max_iter=100):
 
-        for i in xrange(0, max_iter):
+        for i in range(0, max_iter):
 
             # estimate the model
             if not jac:
@@ -73,7 +73,7 @@ class LatentModelOptimizer:
                                         ftol=3e-16, xtol=3e-16, gtol=3e-16)
 
             if not results.success:
-                print "model estimation warning: " + results.message
+                print("model estimation warning: " + results.message)
             self.hidden_vars = results.x
 
             self.validate_model()
@@ -87,18 +87,18 @@ class LatentModelOptimizer:
                                    hess=hes, bounds=bounds_params, tol=1E-16)
 
             if not results.success:
-                print "model minimization warning: " + results.message
+                print("model minimization warning: " + results.message)
             self.set_params(list(results.x))
-            print str(i) + "th iteration: minimum is " + str(results.fun)
+            print(str(i) + "th iteration: minimum is " + str(results.fun))
 
             res = self.functional_residual_square(self.hidden_vars)
-            print str(i) + "th iteration: residual is " + str(res)
+            print(str(i) + "th iteration: residual is " + str(res))
             if res < tol:
                 pass
                 # break
 
-            print self.hidden_vars
-            print self.params
+            print(self.hidden_vars)
+            print(self.params)
 
             self.validate_model()
 
@@ -122,15 +122,15 @@ class LatentModelOptimizer:
             return jac_
 
         if not jac:
-            results = least_squares(loss_function, [0.5, 0.5],
+            results = least_squares(loss_function, [0.5, np.pi],
                                     verbose=2, method=method, bounds=bounds, ftol=3e-16, xtol=3e-16, gtol=3e-16)
 
         else:
-            results = least_squares(loss_function, [0.5, 0.5],
+            results = least_squares(loss_function, [0.5, np.pi],
                                     jac=loss_function_jac, verbose=2,
                                     method=method, bounds=bounds, ftol=3e-16, xtol=3e-16, gtol=3e-16)
 
-        print results.message
+        print(results.message)
         self.hidden_vars = results.x
 
         self.validate_model()
