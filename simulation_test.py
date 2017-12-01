@@ -16,7 +16,7 @@ class TestModel(MingLeiModel):
             params)
 
 
-target_hidden_vars = [0.1, 0.1 * math.pi]
+target_hidden_vars = [0.4, 0.1 * math.pi]
 model = TestModel([0.5, 0.5], [0.5, 0.5])
 
 model.train_and_optimize()

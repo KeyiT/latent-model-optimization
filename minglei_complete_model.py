@@ -230,6 +230,12 @@ class MingLeiModel(LatentModelOptimizer):
         ]
 
         # minimize the estimated model
+        def map2domain(theta):
+            while theta > 2 * np.pi:
+                theta -= 2 * np.pi
+            while theta < 0:
+                theta += 2 * np.pi
+            return theta
 
         for ini in init_guess:
             print(ini)
@@ -243,9 +249,13 @@ class MingLeiModel(LatentModelOptimizer):
                                    np.ndarray(shape=[2], buffer=np.array(ini)),
                                    method=optimize_method, jac=self.model_jac, hess=self.model_hes, tol=1E-16
                                    )
-            self.set_params(list(results.x))
+
             if results.success and results.fun < 1E-5:
                 print("minimum is " + str(results.fun))
+                ps = list(map(
+                    map2domain, results.x
+                ))
+                self.set_params(ps)
                 break
 
         self.validate_model()
