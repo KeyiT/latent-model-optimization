@@ -14,6 +14,8 @@ class MingLeiModel(LatentModelOptimizer):
     def __init__(self, init_hidden_vars, init_params):
         super(MingLeiModel, self).__init__(init_hidden_vars, init_params)
 
+        print("initializing...")
+
         # generate lambda function of jacobin of model with respect to hidden variables
         h1, h2 = sym.symbols('h1, h2', real=True)
         theta1, theta2 = sym.symbols('theta1, theta2', real=True)
@@ -39,9 +41,9 @@ class MingLeiModel(LatentModelOptimizer):
             jac_params_sym_, modules='numpy')
 
         # test lambda function of jacobins
-        print(self._jac_params(0.1, 0.1, 0.1, 0.1))
-        print(self._jac_hidden(0.1, 0.1, 0.1, 0.1))
-        print(self._hes_params(0.1, 0.1, 0.1, 0.1))
+        #print(self._jac_params(0.1, 0.1, 0.1, 0.1))
+        #print(self._jac_hidden(0.1, 0.1, 0.1, 0.1))
+        #print(self._hes_params(0.1, 0.1, 0.1, 0.1))
 
         # generate lambda function of latent model
         h1, h2 = sym.symbols('h1, h2', real=True)
@@ -49,6 +51,8 @@ class MingLeiModel(LatentModelOptimizer):
         self._latent_model = lambdify(
             (h1, h2, theta1, theta2),
             sym.re(MingLeiModel._latent_model_sym(h1, h2, theta1, theta2)), modules='numpy')
+
+        print("initialization done!")
 
 
     @classmethod
@@ -207,7 +211,7 @@ class MingLeiModel(LatentModelOptimizer):
         h1 = min(h1, 1.0)
         return self._hes_params(h1, h2, theta1, theta2)
 
-    def train_and_optimize(self, sample_numbers=[5, 5], optimize_method='Newton-CG', jac=True):
+    def train_and_optimize(self, sample_numbers=[4, 4], optimize_method='Newton-CG', jac=True):
 
         # train model
         sample_params1 = np.linspace(0, math.pi * 2, sample_numbers[0])

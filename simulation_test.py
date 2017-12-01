@@ -15,7 +15,6 @@ class TestModel(MingLeiModel):
             target_hidden_vars,
             params)
 
-
 target_hidden_vars = [0.4, 0.1 * math.pi]
 model = TestModel([0.5, 0.5], [0.5, 0.5])
 

@@ -132,7 +132,7 @@ class LatentModelOptimizer(object):
         if not jac:
             for ini in init_guess:
                 results = least_squares(loss_function, ini,
-                                    verbose=2, method=method, bounds=bounds, ftol=3e-16, xtol=3e-16, gtol=3e-16)
+                                    verbose=1, method=method, bounds=bounds, ftol=3e-16, xtol=3e-16, gtol=3e-16)
                 if results.success and np.sum(np.array(results.fun)) < 1E-14:
                     self.hidden_vars = results.x
                     break
@@ -140,7 +140,7 @@ class LatentModelOptimizer(object):
         else:
             for ini in init_guess:
                 results = least_squares(loss_function, ini,
-                                        jac=loss_function_jac, verbose=2,
+                                        jac=loss_function_jac, verbose=1,
                                         method=method, bounds=bounds, ftol=3e-16, xtol=3e-16, gtol=3e-16)
                 if results.success and np.sum(np.array(results.fun)) < 1E-14:
                     self.hidden_vars = results.x
