@@ -3,7 +3,7 @@ import math
 import numpy as np
 
 
-class LatentModelOptimizer:
+class LatentModelOptimizer(object):
 
     def __init__(self, init_hidden_vars, init_params):
         self.hidden_vars = list(init_hidden_vars)
@@ -121,17 +121,30 @@ class LatentModelOptimizer:
 
             return jac_
 
+        init_guess = [
+            [0.5, np.pi],
+            [0.1, np.pi*0.1],
+            [0.1, np.pi*1.8],
+            [0.9, np.pi*1.8],
+            [0.9, np.pi*0.1]
+        ]
+
         if not jac:
-            results = least_squares(loss_function, [0.5, np.pi],
+            for ini in init_guess:
+                results = least_squares(loss_function, ini,
                                     verbose=2, method=method, bounds=bounds, ftol=3e-16, xtol=3e-16, gtol=3e-16)
+                if results.success and np.sum(np.array(results.fun)) < 1E-14:
+                    self.hidden_vars = results.x
+                    break
 
         else:
-            results = least_squares(loss_function, [0.5, np.pi],
-                                    jac=loss_function_jac, verbose=2,
-                                    method=method, bounds=bounds, ftol=3e-16, xtol=3e-16, gtol=3e-16)
-
-        print(results.message)
-        self.hidden_vars = results.x
+            for ini in init_guess:
+                results = least_squares(loss_function, ini,
+                                        jac=loss_function_jac, verbose=2,
+                                        method=method, bounds=bounds, ftol=3e-16, xtol=3e-16, gtol=3e-16)
+                if results.success and np.sum(np.array(results.fun)) < 1E-14:
+                    self.hidden_vars = results.x
+                    break
 
         self.validate_model()
 

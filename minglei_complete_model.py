@@ -12,8 +12,7 @@ from pylab import *
 class MingLeiModel(LatentModelOptimizer):
 
     def __init__(self, init_hidden_vars, init_params):
-        self.hidden_vars = list(init_hidden_vars)
-        self.params = list(init_params)
+        super(MingLeiModel, self).__init__(init_hidden_vars, init_params)
 
         # generate lambda function of jacobin of model with respect to hidden variables
         h1, h2 = sym.symbols('h1, h2', real=True)
@@ -190,11 +189,6 @@ class MingLeiModel(LatentModelOptimizer):
         h1 = min(h1, 1.0)
         return self._jac_hidden(h1, h2, theta1, theta2)
 
-    def observe(self, params):
-        return self.latent_model(
-            target_hidden_vars,
-            params)
-
     def validate_model(self):
         """
         if 0 <= self.params[0] <= 2 * math.pi and \
@@ -213,102 +207,45 @@ class MingLeiModel(LatentModelOptimizer):
         h1 = min(h1, 1.0)
         return self._hes_params(h1, h2, theta1, theta2)
 
+    def train_and_optimize(self, sample_numbers=[5, 5], optimize_method='Newton-CG', jac=True):
 
-target_hidden_vars = [0.1, 0.3*math.pi]
-model = MingLeiModel([0.5, 0.5], [0.5, 0.5])
+        # train model
+        sample_params1 = np.linspace(0, math.pi * 2, sample_numbers[0])
+        sample_params2 = np.linspace(0, math.pi * 2, sample_numbers[1])
+        sample_params = []
+        for sample1 in sample_params1:
+            for sample2 in sample_params2:
+                sample_params.append([sample1, sample2])
 
+        self.train(sample_parameters=sample_params, bounds=([0, 0], [1, 2 * math.pi]), method='trf', jac=True)
 
-# train model
-sample_params1 = np.linspace(0, math.pi*2, 5)
-sample_params2 = np.linspace(0, math.pi*2, 5)
-sample_params = []
-for sample1 in sample_params1:
-    for sample2 in sample_params2:
-        sample_params.append([sample1, sample2])
+        self.validate_model()
 
-model.train(sample_parameters=sample_params, bounds=([0, 0], [1, 2 * math.pi]),
-            method='dogbox', jac=True)
-print("\nhidden variables:")
-print(model.hidden_vars)
-print("target hidden variables:")
-print(target_hidden_vars)
+        init_guess = [
+            [np.pi, np.pi],
+            [0.1*np.pi, np.pi * 0.1],
+            [0.1*np.pi, np.pi * 1.8],
+            [1.8*np.pi, np.pi * 1.8],
+            [1.8*np.pi, np.pi * 0.1]
+        ]
 
-# find minimum
-results = minimize(model.model,
-                   np.ndarray(shape=[2], buffer=np.array([np.pi, np.pi])),
-                   method='Newton-CG', jac=model.model_jac, hess=model.model_hes, tol=1E-16
-                   )
-model.params = results.x
-print(results.message)
-print("model parameters:")
-print(model.params)
-print("minimum:")
-print(results.fun)
+        # minimize the estimated model
 
-model.hidden_vars = target_hidden_vars
-results = minimize(model.model,
-                   np.ndarray(shape=[2], buffer=np.array([np.pi, np.pi])),
-                   method='Newton-CG', jac=model.model_jac, hess=model.model_hes, tol=1E-16
-                   )
-print(results.message)
-print("target model parameters:")
-print(results.x)
-print("target minimum:")
-print(results.fun)
+        for ini in init_guess:
+            print(ini)
+            if not jac:
+                results = minimize(self.model,
+                                   np.ndarray(shape=[2], buffer=np.array(ini)),
+                                   method=optimize_method, jac=False, tol=1E-16
+                                   )
+            else:
+                results = minimize(self.model,
+                                   np.ndarray(shape=[2], buffer=np.array(ini)),
+                                   method=optimize_method, jac=self.model_jac, hess=self.model_hes, tol=1E-16
+                                   )
+            self.set_params(list(results.x))
+            if results.success and results.fun < 1E-5:
+                print("minimum is " + str(results.fun))
+                break
 
-
-
-import matplotlib.pyplot as plt
-
-sample_params1 = np.linspace(0, math.pi*2, 50)
-sample_params2 = np.linspace(0, math.pi*2, 50)
-model.hidden_vars = target_hidden_vars
-X, Y = meshgrid(sample_params1, sample_params2)
-Z = []
-for i in range(0, len(X)):
-    Z.append(model.observe([X[i], Y[i]]))
-
-
-figure()
-fig, ax = subplots()
-p = ax.contourf(X, Y, Z)
-cb = fig.colorbar(p)
-plt.savefig('fig1.pdf')
-"""
-
-
-model.hidden_vars = np.ndarray(shape=[2], buffer=np.array([0.1, 0.1]))
-model.params = np.ndarray(shape=[2], buffer=np.array([0.1, 0.1]))
-model.optimize(max_iter=100,
-               jac=True,
-               hes=model.model_hes,
-               method='trust-ncg',
-               bounds_hidden_vars=([0, 0], [1, 2*math.pi]))
-
-print("\nhidden variables:"
-print(model.hidden_vars
-print("target hidden variables:"
-print(target_hidden_vars
-
-
-# results = minimize(model.model, model.params, jac=model.model_jac, bounds=((0, 2*math.pi), (0, 2*math.pi)))
-#print(results.message
-print("model parameters:"
-print(model.params
-print("minimum:"
-print(model.latent_model(model.hidden_vars, model.params)
-
-model.hidden_vars = target_hidden_vars
-
-print(model.model_jac([0.1, 0.1]).shape
-results = minimize(model.model,
-                   np.ndarray(shape=[2], buffer=np.array([1.5, 1.5])), hess=model.model_hes,
-                   method='Newton-CG', tol=1E-21, jac=model.model_jac
-                   )
-print(results.message
-print("model parameters:"
-print("target model parameters:"
-print(results.x
-print("target minimum:"
-print(results.fun
-"""
+        self.validate_model()
