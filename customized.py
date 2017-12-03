@@ -1,5 +1,6 @@
 from minglei_complete_model import MingLeiModel
 import hp816x_instr
+import time
 
 
 class PhysicalModel(MingLeiModel):
@@ -15,6 +16,7 @@ class PhysicalModel(MingLeiModel):
     def observe(self, params):
         # TODO: return p3 from your machine (in power unit)
         self.set_params(params)
+        time.sleep(0)
         return hp816x_instr.hp816x().readPWM(self.slot, self.chn)
     
     def set_params(self, params):
