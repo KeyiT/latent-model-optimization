@@ -26,6 +26,7 @@ class PhysicalModel(MingLeiModel):
 # instruction:
 # 1. implement observe and set_params in PhysicalModel
 # 2. initialize: model = PhysicalModel([0.5, 0.5], [0.5, 0.5])
-# 3. find h1, h2, theta1, theta2: model.train_and_optimize()
-# 4. get it run along with your machine. you can keep calling
+# 3. set slot and channel: model.set_slot_chn(1, 1)
+# 4. find h1, h2, theta1, theta2: model.train_and_optimize()
+# 5. get it run along with your machine. you can keep calling
         # model.train_and_optimize() to calibrate your machine in each time step
