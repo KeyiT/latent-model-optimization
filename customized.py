@@ -1,11 +1,12 @@
 from minglei_complete_model import MingLeiModel
+import hp816x_instr_
 
 
 class PhysicalModel(MingLeiModel):
     def __init__(self, init_hidden_vars, init_params):
         super(PhysicalModel, self).__init__(init_hidden_vars, init_params)
 
-    def observe(self, slot, chn):
+    def observe(self, [slot, chn]):
         pass
         # TODO: return p3 from your machine (in power unit)
         return hp816x_instr_.hp816x().readPWM(slot, chn)
