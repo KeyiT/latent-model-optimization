@@ -11,7 +11,8 @@ class PhysicalModel(MingLeiModel):
     def observe(self, params):
         pass
         # TODO: return p3 from your machine (in power unit)
-        return hp816x_instr_.hp816x().readPWM(self.slot, self.chn)
+        self.set_params(params)
+        return hp816x_instr.hp816x().readPWM(self.slot, self.chn)
     
     def set_params(self, params):
         self.params = params
