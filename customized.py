@@ -9,7 +9,6 @@ class PhysicalModel(MingLeiModel):
         self.chn = None
 
     def observe(self, params):
-        pass
         # TODO: return p3 from your machine (in power unit)
         self.set_params(params)
         return hp816x_instr.hp816x().readPWM(self.slot, self.chn)
