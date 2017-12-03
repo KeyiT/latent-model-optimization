@@ -9,6 +9,8 @@ class PhysicalModel(MingLeiModel):
         self.chn = None
         
         self.keithley_chn = None
+        
+        self.ke26 = Ke26XXA_channels_currentsweep.Ke26XXA_channels_currentsweep(k, channel, imin, imax)
 
     def observe(self, params):
         # TODO: return p3 from your machine (in power unit)
