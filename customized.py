@@ -1,5 +1,5 @@
 from minglei_complete_model import MingLeiModel
-import hp816x_instr_
+import hp816x_instr
 
 
 class PhysicalModel(MingLeiModel):
