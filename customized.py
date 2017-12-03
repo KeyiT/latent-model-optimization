@@ -18,6 +18,9 @@ class PhysicalModel(MingLeiModel):
         self.params = params
         # TODO: set theta1 and theta2 to your machine. params=[theta1, theta2]
 
+    def set_slot_chn(self, slot, chn):
+        self.slot = slot
+        self.chn = chn
 
 
 # instruction:
