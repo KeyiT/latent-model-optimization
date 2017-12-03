@@ -7,6 +7,8 @@ class PhysicalModel(MingLeiModel):
         super(PhysicalModel, self).__init__(init_hidden_vars, init_params)
         self.slot = None
         self.chn = None
+        
+        self.keithley_chn = None
 
     def observe(self, params):
         # TODO: return p3 from your machine (in power unit)
@@ -16,7 +18,7 @@ class PhysicalModel(MingLeiModel):
     def set_params(self, params):
         self.params = params
         # TODO: set theta1 and theta2 to your machine. params=[theta1, theta2]
-        self.keithley.setCurrent(self.ch, current)
+        self.keithley.setCurrent(self.keithley_chn, current)
 
     def set_slot_chn(self, slot, chn):
         self.slot = slot
