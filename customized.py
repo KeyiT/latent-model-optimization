@@ -16,6 +16,7 @@ class PhysicalModel(MingLeiModel):
     def set_params(self, params):
         self.params = params
         # TODO: set theta1 and theta2 to your machine. params=[theta1, theta2]
+        self.keithley.setCurrent(self.ch, current)
 
     def set_slot_chn(self, slot, chn):
         self.slot = slot
