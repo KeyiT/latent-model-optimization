@@ -1,32 +1,43 @@
 from minglei_complete_model import MingLeiModel
 import hp816x_instr
 import time
-
+import Ke26XXA
+reload(Ke26XXA)
+from Ke26XXA import Ke26XXA        
+import math
 
 class PhysicalModel(MingLeiModel):
-    def __init__(self, init_hidden_vars, init_params):
+    def __init__(self, init_hidden_vars, init_params,  opt_slot, opt_chn, keith_chn1, keith_chn2, keith_dev, keith_imax):
         super(PhysicalModel, self).__init__(init_hidden_vars, init_params)
-        self.slot = None
-        self.chn = None
-        
-        self.keithley_chn = None
-        
-        self.ke26 = Ke26XXA_channels_currentsweep.Ke26XXA_channels_currentsweep(k, channel, imin, imax)
+        self.opt_slot = opt_slot
+        self.opt_chn = opt_chn
+        self.keith_chn1 = keith_chn1
+        self.keith_chn2 = keith_chn2       
+        self.keith_dev = keith_dev
+        self.keith_imax = keith_imax
 
-    def observe(self, params):
+    def observe(self):
         # TODO: return p3 from your machine (in power unit)
-        self.set_params(params)
         time.sleep(0)
-        return hp816x_instr.hp816x().readPWM(self.slot, self.chn)
+        return hp816x_instr.hp816x().readPWM(self.opt_slot, self.opt_chn)
     
     def set_params(self, params):
         self.params = params
+        alpha = 105
+        R = 220
+        beta = 0.01
         # TODO: set theta1 and theta2 to your machine. params=[theta1, theta2]
-        self.keithley.setCurrent(self.keithley_chn, current)
+        current1 = math.sqrt((params[0]-beta)/(alpha*R))
+        current2 = math.sqrt((params[1]-beta)/(alpha*R))        
+        if(current1 > self.keith_imax + 1e-3): 
+            print 'current larger than maximum channel1 current'
+            current1 = math.sqrt((params[0]-beta-2*math.pi)/(alpha*R))
+        if(current2 > self.keith_imax + 1e-3):
+            print 'current larger than maximum channel2 current'
+            current2 = math.sqrt((params[1]-beta-2*math.pi)/(alpha*R))
+        self.keith_dev.setCurrent(self.keith_chn1, current1)
+        self.keith_dev.setCurrent(self.keith_chn2, current2)
 
-    def set_slot_chn(self, slot, chn):
-        self.slot = slot
-        self.chn = chn
 
 
 # instruction:
