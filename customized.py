@@ -7,28 +7,36 @@ from Ke26XXA import Ke26XXA
 import math
 
 class PhysicalModel(MingLeiModel):
-    def __init__(self, init_hidden_vars, init_params,  opt_slot, opt_chn, keith_chn1, keith_chn2, keith_dev, keith_imax):
+    def __init__(self, init_hidden_vars, init_params, opt_slot, opt_chn, keith_dev, keith_chn1, keith_chn2, keith_imax):
         super(PhysicalModel, self).__init__(init_hidden_vars, init_params)
         self.opt_slot = opt_slot
         self.opt_chn = opt_chn
+        self.keith_dev = keith_dev
         self.keith_chn1 = keith_chn1
         self.keith_chn2 = keith_chn2       
-        self.keith_dev = keith_dev
-        self.keith_imax = keith_imax
+        self.keith_imax = keith_imax         
 
     def observe(self):
         # TODO: return p3 from your machine (in power unit)
         time.sleep(0)
         return hp816x_instr.hp816x().readPWM(self.opt_slot, self.opt_chn)
+ 
+    def on(self):
+        self.keith_dev.outputEnable(self.keith_ch1, True)
+        self.keith_dev.outputEnable(self.keith_ch2, True)
+        
+    def off(self):
+        self.keith_dev.outputEnable(self.keith_ch1, False)
+        self.keith_dev.outputEnable(self.keith_ch2, False)    
     
     def set_params(self, params):
         self.params = params
-        alpha = 105
-        R = 220
-        beta = 0.01
+        alpha = 100.8
+        R = 300
+        beta = 2.962
         # TODO: set theta1 and theta2 to your machine. params=[theta1, theta2]
-        current1 = math.sqrt((params[0]-beta)/(alpha*R))
-        current2 = math.sqrt((params[1]-beta)/(alpha*R))        
+        current1 = math.sqrt((params[0])/(alpha*R))
+        current2 = math.sqrt((params[1])/(alpha*R))        
         if(current1 > self.keith_imax + 1e-3): 
             print 'current larger than maximum channel1 current'
             current1 = math.sqrt((params[0]-beta-2*math.pi)/(alpha*R))
@@ -37,7 +45,6 @@ class PhysicalModel(MingLeiModel):
             current2 = math.sqrt((params[1]-beta-2*math.pi)/(alpha*R))
         self.keith_dev.setCurrent(self.keith_chn1, current1)
         self.keith_dev.setCurrent(self.keith_chn2, current2)
-
 
 
 # instruction:
