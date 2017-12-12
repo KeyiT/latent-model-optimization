@@ -38,13 +38,17 @@ class LatentModelOptimizer(object):
     def observe(self, params):
         raise NotImplementedError
 
-    def functional_residual(self, hidden_vars):
+    def functional_residual(self, hidden_vars, observe_=None):
         """
         Default residual is square of the absolute difference between observation and functional return.
         :param hidden_vars:
+        :param observe_:
         :return:
         """
-        return self.functional(hidden_vars) - self.observe(self.params)
+        if observe_ is None:
+            return self.functional(hidden_vars) - self.observe(self.params)
+        else:
+            return self.functional(hidden_vars) - observe_
 
     def functional_residual_square(self, hidden_vars):
         return self.functional_residual(hidden_vars) ** 2
@@ -104,18 +108,24 @@ class LatentModelOptimizer(object):
 
     def train(self, sample_parameters, method=None, jac=False, bounds=None, max_iter=1, tol=1E-10):
 
+        observes_ = list(map(
+            lambda sample: self.observe(list(sample)),
+            sample_parameters
+        ))
+
         def loss_function(hidden_vars):
             loss = []
-            for sample in sample_parameters:
-                self.set_params(list(sample))
-                loss.append(self.functional_residual(hidden_vars))
+            for i in range(0, len(sample_parameters)):
+                sample = sample_parameters[i]
+                self.params = list(sample)
+                loss.append(self.functional_residual(hidden_vars, observe_=observes_[i]))
 
             return loss
 
         def loss_function_jac(hidden_vars):
             jac_ = []
             for sample in sample_parameters:
-                self.set_params(list(sample))
+                self.params = list(sample)
                 tmp = self.functional_jac(hidden_vars)
                 jac_.append([tmp[0][0], tmp[0][1]])
 
@@ -133,7 +143,7 @@ class LatentModelOptimizer(object):
             for ini in init_guess:
                 results = least_squares(loss_function, ini,
                                     verbose=1, method=method, bounds=bounds, ftol=3e-16, xtol=3e-16, gtol=3e-16)
-                if results.success and np.sum(np.array(results.fun)) < 1E-14:
+                if results.success and np.sum(np.array(results.fun)) < 1E-7:
                     self.hidden_vars = results.x
                     break
 
@@ -142,7 +152,7 @@ class LatentModelOptimizer(object):
                 results = least_squares(loss_function, ini,
                                         jac=loss_function_jac, verbose=1,
                                         method=method, bounds=bounds, ftol=3e-16, xtol=3e-16, gtol=3e-16)
-                if results.success and np.sum(np.array(results.fun)) < 1E-14:
+                if results.success and np.sum(np.array(results.fun)) < 1E-7:
                     self.hidden_vars = results.x
                     break
 

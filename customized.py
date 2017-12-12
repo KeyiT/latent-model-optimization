@@ -6,15 +6,16 @@ reload(Ke26XXA)
 from Ke26XXA import Ke26XXA        
 import math
 
+
 class PhysicalModel(MingLeiModel):
     def __init__(self, init_hidden_vars, init_params, opt_slot, opt_chn, keith_dev, keith_chn1, keith_chn2, keith_imax):
-        super(PhysicalModel, self).__init__(init_hidden_vars, init_params)
         self.opt_slot = opt_slot
         self.opt_chn = opt_chn
         self.keith_dev = keith_dev
         self.keith_chn1 = keith_chn1
-        self.keith_chn2 = keith_chn2       
-        self.keith_imax = keith_imax         
+        self.keith_chn2 = keith_chn2
+        self.keith_imax = keith_imax
+        super(PhysicalModel, self).__init__(init_hidden_vars, init_params)
 
     def observe(self, params):
         # TODO: return p3 from your machine (in power unit)
