@@ -47,7 +47,7 @@ class PhysicalModel(MingLeiModel):
         
     def off(self):
         self.keith_dev.outputEnable(self.keith_chn1, False)
-        self.keith_dev.outputEnable(self.keith_chn2, False)    
+        self.keith_dev.outputEnable(self.keith_chn2, False)
     
     def set_params(self, params):
         self.params = params
@@ -60,7 +60,31 @@ class PhysicalModel(MingLeiModel):
 #        eqn1 = a[0]*current1**4 + a[1]*current1**3 + a[2]*current1**2 - (params[0] - beta)/alpha
 #        eqn2 = b[0]*current2**4 + b[1]*current1**3 + b[2]*current1**2 - (params[1] - beta)/alpha
 #        slove(eqn1, current1, )
-        
+
+        coeff = [
+            3.5833e+05, 31480, 157.6143, 159.2961, 0, -(params[0] - beta) / alpha,
+            3.5833e+05, 31480, 157.6143, 159.2961, 0, -(params[1] - beta) / alpha,
+        ]
+        roots = [np.roots(coeff[0]), np.roots(coeff[1])]
+
+        for i in range(0, len(roots)):
+            roots_ = roots[i]
+            roots_ = list(filter(
+                lambda r_: np.abs(np.imag(r_)) < 1E-8,
+                roots_
+            ))
+            roots[i] = list(filter(
+                lambda r_: r_ >= 0 & r_ < 0.036,
+                roots_
+            ))
+
+            if len(roots[i]) == 0:
+                raise ValueError("invalid roots")
+
+        print("\ncurrent: ")
+        print(roots)
+
+        """
         # TODO: set theta1 and theta2 to your machine. params=[theta1, theta2]
         if params[0] < beta and params[1] < beta:
             current1 = math.sqrt((params[0]-beta+2*math.pi)/(alpha*R))
@@ -80,8 +104,10 @@ class PhysicalModel(MingLeiModel):
         if current2 > self.keith_imax + 1e-3:
             print('current larger than maximum channel2 current')
             current2 = math.sqrt((params[1]-beta-2*math.pi)/(alpha*R))
-        self.keith_dev.setCurrent(self.keith_chn1, current1)
-        self.keith_dev.setCurrent(self.keith_chn2, current2)
+        """
+
+        self.keith_dev.setCurrent(self.keith_chn1, roots[0][0])
+        self.keith_dev.setCurrent(self.keith_chn2, roots[1][0])
 
 
 # instruction:
