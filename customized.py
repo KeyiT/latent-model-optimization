@@ -62,8 +62,8 @@ class PhysicalModel(MingLeiModel):
 #        slove(eqn1, current1, )
 
         coeff = [
-            3.5833e+05, 31480, 157.6143, 159.2961, 0, -(params[0] - beta) / alpha,
-            3.5833e+05, 31480, 157.6143, 159.2961, 0, -(params[1] - beta) / alpha,
+            [3.5833e+05, 31480, 157.6143, 159.2961, 0, -(params[0] - beta) / alpha],
+            [3.5833e+05, 31480, 157.6143, 159.2961, 0, -(params[1] - beta) / alpha]
         ]
         roots = [np.roots(coeff[0]), np.roots(coeff[1])]
 
