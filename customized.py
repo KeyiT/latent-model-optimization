@@ -74,7 +74,7 @@ class PhysicalModel(MingLeiModel):
                 roots_
             ))
             roots[i] = list(filter(
-                lambda r_: r_ >= 0 & r_ < 0.036,
+                lambda r_: True if (r_ >= 0) and (r_ < 0.036) else False,
                 roots_
             ))
 
