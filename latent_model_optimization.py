@@ -149,6 +149,7 @@ class LatentModelOptimizer(object):
 
         else:
             for ini in init_guess:
+                print(ini)
                 results = least_squares(loss_function, ini,
                                         jac=loss_function_jac, verbose=1,
                                         method=method, bounds=bounds, ftol=3e-16, xtol=3e-16, gtol=3e-16)
