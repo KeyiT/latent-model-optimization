@@ -3,6 +3,7 @@ import numpy as np
 from scipy.optimize import minimize, minimize_scalar
 import math
 from pylab import *
+import json
 
 
 class TestModel(MingLeiModel):
@@ -15,10 +16,11 @@ class TestModel(MingLeiModel):
             target_hidden_vars,
             params)
 
-target_hidden_vars = [0.4, 0.1 * math.pi]
+
+target_hidden_vars = [0.35118778, 0.04615398]
 model = TestModel([0.5, 0.5], [0.5, 0.5])
 
-model.train_and_optimize()
+model.train_and_optimize([5, 5])
 print("\nhidden variables:")
 print(model.hidden_vars)
 print("target hidden variables:")
@@ -43,8 +45,8 @@ print(results.fun)
 
 import matplotlib.pyplot as plt
 
-sample_params1 = np.linspace(0, math.pi * 2, 100)
-sample_params2 = np.linspace(0, math.pi * 2, 100)
+sample_params1 = np.linspace(0, math.pi * 2, 5)
+sample_params2 = np.linspace(0, math.pi * 2, 5)
 model.hidden_vars = target_hidden_vars
 X, Y = meshgrid(sample_params1, sample_params2)
 Z = []
@@ -55,4 +57,22 @@ figure()
 fig, ax = subplots()
 p = ax.contourf(X, Y, Z)
 cb = fig.colorbar(p)
-plt.savefig('fig1.pdf')
+plt.savefig('fig1.png')
+
+with open('data/observation.json', 'r') as fp:
+    ZZ = json.load(fp)
+
+Z = []
+print(np.max(ZZ))
+for i in range(0, 5):
+    Z_ = []
+    for j in range(0, 5):
+        Z_.append(ZZ[i*5 + j])
+    Z.append(Z_)
+
+figure()
+fig, ax = subplots()
+p = ax.contourf(X, Y, Z)
+cb = fig.colorbar(p)
+plt.savefig('fig2.png')
+

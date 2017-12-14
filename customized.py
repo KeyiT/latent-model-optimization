@@ -115,8 +115,8 @@ class PhysicalModel(MingLeiModel):
             current2 = math.sqrt((params[1]-beta-2*math.pi)/(alpha*R))
         """
 
-        self.keith_dev.setCurrent(self.keith_chn1, roots[0][0])
-        self.keith_dev.setCurrent(self.keith_chn2, roots[1][0])
+        self.keith_dev.setCurrent(self.keith_chn1, np.real(roots[0][0]))
+        self.keith_dev.setCurrent(self.keith_chn2, np.real(roots[1][0]))
 
 
 # instruction:
