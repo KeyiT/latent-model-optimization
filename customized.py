@@ -61,9 +61,18 @@ class PhysicalModel(MingLeiModel):
 #        eqn2 = b[0]*current2**4 + b[1]*current1**3 + b[2]*current1**2 - (params[1] - beta)/alpha
 #        slove(eqn1, current1, )
 
+        inter_ = [
+            params[0] - beta,
+            params[1] - beta
+        ]
+        inter_ = list(map(
+            lambda xx: xx+2*np.pi if xx < 0 else xx,
+            inter_
+        ))
+
         coeff = [
-            [3.5833e+05, 31480, 157.6143, 159.2961, 0, -(params[0] - beta) / alpha],
-            [3.5833e+05, 31480, 157.6143, 159.2961, 0, -(params[1] - beta) / alpha]
+            [3.5833e+05, 31480, 157.6143, 159.2961, 0, -inter_[0] / alpha],
+            [3.5833e+05, 31480, 157.6143, 159.2961, 0, -inter_[1] / alpha]
         ]
         roots = [np.roots(coeff[0]), np.roots(coeff[1])]
 
