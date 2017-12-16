@@ -6,7 +6,7 @@ import math
 import sympy as sym
 from sympy.utilities.lambdify import lambdify
 
-from pylab import *
+# from pylab import *
 
 
 class MingLeiModel(LatentModelOptimizer):
@@ -214,13 +214,13 @@ class MingLeiModel(LatentModelOptimizer):
         return self._hes_params(h1, h2, theta1, theta2)
 
 
-target_hidden_vars = [0.1, 0.3*math.pi]
+target_hidden_vars = [0.9, 0.3*math.pi]
 model = MingLeiModel([0.5, 0.5], [0.5, 0.5])
 
 
 # train model
-sample_params1 = np.linspace(0, math.pi*2, 5)
-sample_params2 = np.linspace(0, math.pi*2, 5)
+sample_params1 = np.linspace(0, math.pi*2, 4)
+sample_params2 = np.linspace(0, math.pi*2, 4)
 sample_params = []
 for sample1 in sample_params1:
     for sample2 in sample_params2:
@@ -229,9 +229,9 @@ for sample1 in sample_params1:
 model.train(sample_parameters=sample_params, bounds=([0, 0], [1, 2 * math.pi]),
             method='dogbox', jac=True)
 print("\nhidden variables:")
-print(model.hidden_vars)
+print("%9f, %9f" % (model.hidden_vars[0], model.hidden_vars[1]))
 print("target hidden variables:")
-print(target_hidden_vars)
+print("%9f, %9f" % (target_hidden_vars[0], target_hidden_vars[1]))
 
 # find minimum
 results = minimize(model.model,
@@ -257,7 +257,7 @@ print("target minimum:")
 print(results.fun)
 
 
-
+"""
 import matplotlib.pyplot as plt
 
 sample_params1 = np.linspace(0, math.pi*2, 50)
@@ -274,7 +274,7 @@ fig, ax = subplots()
 p = ax.contourf(X, Y, Z)
 cb = fig.colorbar(p)
 plt.savefig('fig1.pdf')
-"""
+
 
 
 model.hidden_vars = np.ndarray(shape=[2], buffer=np.array([0.1, 0.1]))

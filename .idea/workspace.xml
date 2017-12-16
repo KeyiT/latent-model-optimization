@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="dbf6d9cb-6878-4e08-b0e7-4ebb27ff087a" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/latent_model_optimization.py" afterPath="$PROJECT_DIR$/latent_model_optimization.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/minglei_complete_model.py" afterPath="$PROJECT_DIR$/minglei_complete_model.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -15,11 +14,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="latent_model_optimization.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="latent_model_optimization.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/latent_model_optimization.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="19">
-              <caret line="12" column="8" lean-forward="false" selection-start-line="12" selection-start-column="8" selection-end-line="12" selection-end-column="8" />
+            <state relative-caret-position="861">
+              <caret line="103" column="0" lean-forward="true" selection-start-line="103" selection-start-column="0" selection-end-line="103" selection-end-column="0" />
               <folding>
                 <element signature="e#0#50#0" expanded="true" />
               </folding>
@@ -30,17 +29,17 @@
       <file leaf-file-name="least_squares.py" pinned="false" current-in-tab="false">
         <entry file="file://$USER_HOME$/tensorflow/lib/python2.7/site-packages/scipy/optimize/_lsq/least_squares.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-403">
+            <state relative-caret-position="6191">
               <caret line="496" column="19" lean-forward="false" selection-start-line="496" selection-start-column="19" selection-end-line="496" selection-end-column="19" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="_minimize.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="_minimize.py" pinned="false" current-in-tab="true">
         <entry file="file://$USER_HOME$/tensorflow/lib/python2.7/site-packages/scipy/optimize/_minimize.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="186">
+            <state relative-caret-position="-9674">
               <caret line="66" column="15" lean-forward="false" selection-start-line="66" selection-start-column="15" selection-end-line="66" selection-end-column="26" />
               <folding />
             </state>
@@ -50,8 +49,8 @@
       <file leaf-file-name="minglei_complete_model.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/minglei_complete_model.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1007">
-              <caret line="53" column="37" lean-forward="false" selection-start-line="53" selection-start-column="37" selection-end-line="53" selection-end-column="37" />
+            <state relative-caret-position="266">
+              <caret line="14" column="49" lean-forward="true" selection-start-line="14" selection-start-column="49" selection-end-line="14" selection-end-column="49" />
               <folding>
                 <element signature="e#0#39#0" expanded="true" />
               </folding>
@@ -83,15 +82,16 @@
         <option value="$PROJECT_DIR$/Newton_search_Test_.py" />
         <option value="$PROJECT_DIR$/minglei_model.py" />
         <option value="$USER_HOME$/tensorflow/lib/python2.7/site-packages/scipy/optimize/optimize.py" />
-        <option value="$PROJECT_DIR$/minglei_complete_model.py" />
         <option value="$PROJECT_DIR$/latent_model_optimization.py" />
+        <option value="$PROJECT_DIR$/minglei_complete_model.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="y" value="23" />
-    <option name="width" value="1440" />
-    <option name="height" value="877" />
+    <option name="x" value="1440" />
+    <option name="y" value="-11" />
+    <option name="width" value="2560" />
+    <option name="height" value="1417" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -174,12 +174,12 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="1440" height="877" extended-state="6" />
+    <frame x="1440" y="-11" width="2560" height="1417" extended-state="6" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.102288984" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.08339953" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.41048592" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3797277" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -390,37 +390,37 @@
     </entry>
     <entry file="file://$USER_HOME$/tensorflow/lib/python2.7/site-packages/scipy/optimize/_lsq/least_squares.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-403">
+        <state relative-caret-position="6191">
           <caret line="496" column="19" lean-forward="false" selection-start-line="496" selection-start-column="19" selection-end-line="496" selection-end-column="19" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/tensorflow/lib/python2.7/site-packages/scipy/optimize/_minimize.py">
+    <entry file="file://$PROJECT_DIR$/latent_model_optimization.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="186">
-          <caret line="66" column="15" lean-forward="false" selection-start-line="66" selection-start-column="15" selection-end-line="66" selection-end-column="26" />
-          <folding />
+        <state relative-caret-position="861">
+          <caret line="103" column="0" lean-forward="true" selection-start-line="103" selection-start-column="0" selection-end-line="103" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#50#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/minglei_complete_model.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1007">
-          <caret line="53" column="37" lean-forward="false" selection-start-line="53" selection-start-column="37" selection-end-line="53" selection-end-column="37" />
+        <state relative-caret-position="266">
+          <caret line="14" column="49" lean-forward="true" selection-start-line="14" selection-start-column="49" selection-end-line="14" selection-end-column="49" />
           <folding>
             <element signature="e#0#39#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/latent_model_optimization.py">
+    <entry file="file://$USER_HOME$/tensorflow/lib/python2.7/site-packages/scipy/optimize/_minimize.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="19">
-          <caret line="12" column="8" lean-forward="false" selection-start-line="12" selection-start-column="8" selection-end-line="12" selection-end-column="8" />
-          <folding>
-            <element signature="e#0#50#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="-9674">
+          <caret line="66" column="15" lean-forward="false" selection-start-line="66" selection-start-column="15" selection-end-line="66" selection-end-column="26" />
+          <folding />
         </state>
       </provider>
     </entry>
