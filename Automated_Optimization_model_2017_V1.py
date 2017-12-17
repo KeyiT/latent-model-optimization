@@ -82,10 +82,6 @@ baseFolder = 'D:/Minglei/ActiveIMEchip_2017test/SiEPICPassive193nm_chip7_PR_noen
 matfile_name='OptOuput_MHSweepMax30mA_TM0dBminput_1550_2nm.mat'    
 matDict = dict()
 matDict['data'] = dict()
-matDict['data']['voltage'] = voltages_sweep
-matDict['data']['current'] = currents_sweep
-matDict['data']['PoutTop_2ndMH'] = OutputpowerTop_sweepP1
-matDict['data']['PoutBottom_2ndMH'] = OutputpowerBottom_sweepP1
-matDict['data']['PoutTop_1stMH'] = OutputpowerTop_sweepP2
-matDict['data']['PoutBottom_1stMH'] = OutputpowerBottom_sweepP2
+matDict['data']['OutputpowerBottom'] = OutputpowerBottom
+matDict['data']['OutputpowerTop'] = OutputpowerTop
 savemat(baseFolder+matfile_name, matDict)
