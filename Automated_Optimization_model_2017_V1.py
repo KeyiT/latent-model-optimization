@@ -45,6 +45,7 @@ model.hpmainframe_laser('on')
 Timematrix = []         # measurement timetable
 OutputpowerTop = []
 OutputpowerBottom = []
+Currents = []
 T0 = time.time()
 Timematrix.append(T0)   # set the initital time
 
@@ -61,18 +62,30 @@ for iteration in xrange(0,4):
     model.setAvgtime(10e-3)
     model.on()
     model.train_and_optimize(sample_numbers=[5,5])
-    model.setPWMUnit('dBm')
     Timematrix.append(time.time())
     OutputpowerBottom.append(model.Output_PWM(0))
     OutputpowerTop.append(model.Output_PWM(1))
+    Currents.append()
     time.sleep(5.0)
     iteration = iteration + 1
     
 #%%
+model.setPWMUnit('dBm')
 model.off()
 model.hpmainframe_laser('off')
 
 Timematrix[:] = [x-T0-1 for x in Timematrix]   #get the recording time from 0
 Timematrix = np.asarray(Timematrix)
                             
-
+#%% save iv data
+baseFolder = 'D:/Minglei/ActiveIMEchip_2017test/SiEPICPassive193nm_chip7_PR_noendlessL100um/'
+matfile_name='OptOuput_MHSweepMax30mA_TM0dBminput_1550_2nm.mat'    
+matDict = dict()
+matDict['data'] = dict()
+matDict['data']['voltage'] = voltages_sweep
+matDict['data']['current'] = currents_sweep
+matDict['data']['PoutTop_2ndMH'] = OutputpowerTop_sweepP1
+matDict['data']['PoutBottom_2ndMH'] = OutputpowerBottom_sweepP1
+matDict['data']['PoutTop_1stMH'] = OutputpowerTop_sweepP2
+matDict['data']['PoutBottom_1stMH'] = OutputpowerBottom_sweepP2
+savemat(baseFolder+matfile_name, matDict)
