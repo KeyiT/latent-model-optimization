@@ -10,25 +10,36 @@ import numpy as np
 #from sympy import Symbol
 
 class PhysicalModel(MingLeiModel):
-    def __init__(self, init_hidden_vars, init_params, opt_slot, opt_chn, keith_dev, keith_chn1, keith_chn2, keith_imax):
+    def __init__(self, init_hidden_vars, init_params, opt_slot, opt_obv_chn, keith_dev, keith_chn1, keith_chn2, keith_imax):
         self.opt_slot = opt_slot
-        self.opt_chn = opt_chn
+        self.opt_obv_chn = opt_obv_chn
         self.keith_dev = keith_dev
         self.keith_chn1 = keith_chn1
         self.keith_chn2 = keith_chn2       
         self.keith_imax = keith_imax 
         self.hp_mainframe = hp816x_instr.hp816x() 
         super(PhysicalModel, self).__init__(init_hidden_vars, init_params)
-        print('ok1')
+#        print('ok')
 
     def observe(self, params):
         # TODO: return p3 from your machine (in power unit)
         self.set_params(params)
         time.sleep(0.001)  ##unit: s
-        p3 = self.hp_mainframe.readPWM(self.opt_slot, self.opt_chn)
+        p3 = self.hp_mainframe.readPWM(self.opt_slot, self.opt_obv_chn) 
+        p3_normalized = p3/41.69e-06
         p3_dBm = 10*np.log10(p3)+30
         print(p3_dBm)
-        return p3
+        return p3_normalized
+    
+    def Output_PWM(self, opt_chn):
+        time.sleep(0.001)  ##unit: s
+        p4 = self.hp_mainframe.readPWM(self.opt_slot, self.opt_chn) 
+        p4_dBm = 10*np.log10(p4)+30
+#        print(p4_dBm)
+        return p4_dBm
+
+    def hpmainframe_laser(self, state):
+        self.hp_mainframe.setTLSState(state, slot='auto')
 
     def hpmainframe_connect(self, visaAddr):
         self.hp_mainframe.connect(visaAddr, reset=0, forceTrans=1) #connects to the laser
@@ -48,12 +59,16 @@ class PhysicalModel(MingLeiModel):
     def off(self):
         self.keith_dev.outputEnable(self.keith_chn1, False)
         self.keith_dev.outputEnable(self.keith_chn2, False)
-    
+
+    def getCurrent(self):
+        currents = [self.keith_dev.getCurrent(self.keith_chn1), self.keith_dev.getCurrent(self.keith_chn2)]
+        return currents
+        
     def set_params(self, params):
         self.params = params
-        alpha = 97.08
-        beta = 0.02539
-        R = 200
+        alpha = 101.9
+        beta = -0.3134
+#        R = 200
         print(params)
 #        a = []
 #        b = []
@@ -71,8 +86,8 @@ class PhysicalModel(MingLeiModel):
         ))
 
         coeff = [
-            [3.5833e+05, 31480, 157.6143, 159.2961, 0, -inter_[0] / alpha],
-            [3.5833e+05, 31480, 157.6143, 159.2961, 0, -inter_[1] / alpha]
+            [264936.16, 35250.36, 81.0323, 155.949, 0, -inter_[0] / alpha],
+            [264936.16, 35250.36, 81.0323, 155.949, 0, -inter_[1] / alpha]
         ]
         roots = [np.roots(coeff[0]), np.roots(coeff[1])]
 
@@ -114,10 +129,8 @@ class PhysicalModel(MingLeiModel):
             print('current larger than maximum channel2 current')
             current2 = math.sqrt((params[1]-beta-2*math.pi)/(alpha*R))
         """
-
-        self.keith_dev.setCurrent(self.keith_chn1, np.real(roots[0][0]))
-        self.keith_dev.setCurrent(self.keith_chn2, np.real(roots[1][0]))
-
+        self.keith_dev.setCurrent(self.keith_chn1, roots[0][0])
+        self.keith_dev.setCurrent(self.keith_chn2, roots[1][0])
 
 # instruction:
 # 1. implement observe and set_params in PhysicalModel
