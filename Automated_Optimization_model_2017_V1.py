@@ -65,7 +65,7 @@ for iteration in xrange(0,4):
     Timematrix.append(time.time())
     OutputpowerBottom.append(model.Output_PWM(0))
     OutputpowerTop.append(model.Output_PWM(1))
-    Currents.append()
+    Currents.append(model.getCurrent)
     time.sleep(5.0)
     iteration = iteration + 1
     
@@ -84,4 +84,5 @@ matDict = dict()
 matDict['data'] = dict()
 matDict['data']['OutputpowerBottom'] = OutputpowerBottom
 matDict['data']['OutputpowerTop'] = OutputpowerTop
+matDict['data']['Currents'] = Currents
 savemat(baseFolder+matfile_name, matDict)
