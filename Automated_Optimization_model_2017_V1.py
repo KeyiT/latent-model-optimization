@@ -46,38 +46,57 @@ Timematrix = []         # measurement timetable
 OutputpowerTop = []
 OutputpowerBottom = []
 Currents = []
-T0 = time.time()
-Timematrix.append(T0)   # set the initital time
-
-for iteration in xrange(0,4):
-    
-    Timematrix.append(time.time())
+model.setPWMUnit('W')
+model.setAvgtime(10e-3)
+model.on()   
+T0 = time.time() #record the initial time 
+for iteration in xrange(0,4):    
     Input1.SetPaddlePos('1', (random.randint(0,999)))
     Input1.SetPaddlePos('2', (random.randint(0,999)))  
     Input1.SetPaddlePos('3', (random.randint(0,999)))
     Input1.SetPaddlePos('4', (random.randint(0,999)))
-    time.sleep(1.0e-2)
-    Timematrix.append(time.time())
-    model.setPWMUnit('W')
-    model.setAvgtime(10e-3)
-    model.on()
-    model.train_and_optimize(sample_numbers=[5,5])
+#    time.sleep(1.0e-2)
+    OutputpowerBottom.append(model.Output_PWM(0))
+    OutputpowerTop.append(model.Output_PWM(1))
+    Currents.append(model.getCurrent())
+    Timematrix.append(time.time())  
+    
+    model.train_and_optimize(sample_numbers=[5,5])    
+    
     Timematrix.append(time.time())
     OutputpowerBottom.append(model.Output_PWM(0))
     OutputpowerTop.append(model.Output_PWM(1))
-    Currents.append(model.getCurrent)
-    time.sleep(5.0)
+    Currents.append(model.getCurrent())
+    
+    for counter in xrange (0,30):
+       Timematrix.append(time.time())
+       OutputpowerBottom.append(model.Output_PWM(0))
+       OutputpowerTop.append(model.Output_PWM(1))
+       Currents.append(model.getCurrent())     
+#       time.sleep(1.0)
+       counter = counter + 1
     iteration = iteration + 1
     
-#%%
-model.setPWMUnit('dBm')
+model.setPWMUnit('dBm')    
+#%%Close the instrucments
 model.off()
 model.hpmainframe_laser('off')
 
+#%%Plot the results
 Timematrix[:] = [x-T0-1 for x in Timematrix]   #get the recording time from 0
+plt.figure()
+plt.plot(Timematrix, OutputpowerBottom,'.--r', Timematrix, OutputpowerTop,'.--b')
+plt.ylim((-50,-10))
+plt.show()
+
 Timematrix = np.asarray(Timematrix)
-                            
-#%% save iv data
+Currents = np.asarray(Currents)
+plt.figure()
+plt.plot(Timematrix, Currents[:,0],'g', Timematrix, Currents[:,1],'y')
+#plt.ylim((0,60))
+plt.show()                  
+          
+#%% save data in .mat file
 baseFolder = 'D:/Minglei/ActiveIMEchip_2017test/SiEPICPassive193nm_chip7_PR_noendlessL100um/'
 matfile_name='OptOuput_MHSweepMax30mA_TM0dBminput_1550_2nm.mat'    
 matDict = dict()
@@ -85,4 +104,5 @@ matDict['data'] = dict()
 matDict['data']['OutputpowerBottom'] = OutputpowerBottom
 matDict['data']['OutputpowerTop'] = OutputpowerTop
 matDict['data']['Currents'] = Currents
+matDict['data']['Timematrix'] = Timematrix
 savemat(baseFolder+matfile_name, matDict)
