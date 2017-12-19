@@ -17,7 +17,11 @@ class PhysicalModel(MingLeiModel):
         self.keith_chn1 = keith_chn1
         self.keith_chn2 = keith_chn2       
         self.keith_imax = keith_imax 
-        self.hp_mainframe = hp816x_instr.hp816x() 
+        self.hp_mainframe = hp816x_instr.hp816x()
+
+        # keyi modifications:
+        self.observes = []
+
         super(PhysicalModel, self).__init__(init_hidden_vars, init_params)
 #        print('ok')
 
@@ -29,8 +33,12 @@ class PhysicalModel(MingLeiModel):
         p3_normalized = p3/41.69e-06
         p3_dBm = 10*np.log10(p3)+30
         print(p3_dBm)
+
+        # keyi modifications:
+        self.observes.append(p3)
+
         return p3_normalized
-    
+
     def Output_PWM(self, opt_chn):
         time.sleep(0.001)  ##unit: s
         p4 = self.hp_mainframe.readPWM(self.opt_slot, self.opt_chn) 
@@ -131,6 +139,10 @@ class PhysicalModel(MingLeiModel):
         """
         self.keith_dev.setCurrent(self.keith_chn1, roots[0][0])
         self.keith_dev.setCurrent(self.keith_chn2, roots[1][0])
+
+    # keyi modifications:
+    def get_observes(self):
+        return self.observes
 
 # instruction:
 # 1. implement observe and set_params in PhysicalModel
