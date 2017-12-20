@@ -214,8 +214,8 @@ class MingLeiModel(LatentModelOptimizer):
     def train_and_optimize(self, sample_numbers=[4, 4], optimize_method='Newton-CG', jac=True):
 
         # train model
-        sample_params1 = np.linspace(0, math.pi * 2, sample_numbers[0])
-        sample_params2 = np.linspace(0, math.pi * 2, sample_numbers[1])
+        sample_params1 = np.linspace(0, math.pi, sample_numbers[0])
+        sample_params2 = np.linspace(0, math.pi, sample_numbers[1])
         sample_params = []
         for sample1 in sample_params1:
             for sample2 in sample_params2:
@@ -259,6 +259,11 @@ class MingLeiModel(LatentModelOptimizer):
                 ps = list(map(
                     map2domain, results.x
                 ))
+
+                if ps[0] > math.pi:
+                    ps[0] -= math.pi
+                    ps[1] = 2*math.pi-ps[1]
+
                 self.set_params(ps)
                 break
 
