@@ -211,7 +211,8 @@ class MingLeiModel(LatentModelOptimizer):
         h1 = min(h1, 1.0)
         return self._hes_params(h1, h2, theta1, theta2)
 
-    def train_and_optimize(self, sample_numbers=[4, 4], optimize_method='Newton-CG', jac=True):
+    def train_and_optimize(self, sample_numbers=[4, 4], optimize_method='Newton-CG',
+                           train_jac=True, optimize_jac=True):
 
         # train model
         sample_params1 = np.linspace(0, math.pi, sample_numbers[0])
@@ -221,17 +222,28 @@ class MingLeiModel(LatentModelOptimizer):
             for sample2 in sample_params2:
                 sample_params.append([sample1, sample2])
 
-        self.train(sample_parameters=sample_params, bounds=([0, 0], [1, 2 * math.pi]), method='trf', jac=True)
-
-        self.validate_model()
-
         init_guess = [
-            [np.pi, np.pi],
-            [0.1*np.pi, np.pi * 0.1],
-            [0.1*np.pi, np.pi * 1.8],
-            [1.8*np.pi, np.pi * 1.8],
-            [1.8*np.pi, np.pi * 0.1]
+            [0.5, np.pi],
+            [0.1, np.pi * 0.1],
+            [0.1, np.pi * 1.8],
+            [0.9, np.pi * 1.8],
+            [0.9, np.pi * 0.1]
         ]
+
+        self.train_optimize_with_batch_sampling(initial_hidden_vars=init_guess, sample_params=sample_params,
+                                                optimize_method=optimize_method,
+                                                train_jac=train_jac, optimize_jac=optimize_jac,
+                                                bounds_hidden_vars=([0, 0], [1, 2 * math.pi]))
+
+    def smart_train_and_optimize(self, max_iter=5, train_jac=True, optimize_jac=True, optimize_method='Newton-CG'):
+
+        self.train_optimize_with_smart_sampling(initia_params=[0.5*np.pi, np.pi],
+                                                train_jac=train_jac, optimize_jac=optimize_jac,
+                                                optimize_method=optimize_method,
+                                                bounds_hidden_vars=([0, 0], [1, 2 * math.pi]),
+                                                max_iter=max_iter)
+
+    def optimize(self, init_guess_, method=None, jac=False, bounds=None, tol=1E-16):
 
         # minimize the estimated model
         def map2domain(theta):
@@ -241,30 +253,26 @@ class MingLeiModel(LatentModelOptimizer):
                 theta += 2 * np.pi
             return theta
 
-        for ini in init_guess:
-            print(ini)
-            if not jac:
-                results = minimize(self.model,
-                                   np.ndarray(shape=[2], buffer=np.array(ini)),
-                                   method=optimize_method, jac=False, tol=1E-16
-                                   )
-            else:
-                results = minimize(self.model,
-                                   np.ndarray(shape=[2], buffer=np.array(ini)),
-                                   method=optimize_method, jac=self.model_jac, hess=self.model_hes, tol=1E-16
-                                   )
+        # minimize the estimated model
+        if not jac:
+            results = minimize(self.model, init_guess_, method=method,
+                               jac=False,
+                               bounds=bounds, tol=tol)
+        else:
+            results = minimize(self.model, init_guess_, method=method,
+                               jac=self.model_jac, hess=self.model_hes,
+                               bounds=bounds, tol=tol)
 
-            if results.success and results.fun < 1E-5:
-                print("minimum is " + str(results.fun))
-                ps = list(map(
-                    map2domain, results.x
-                ))
+        print(results.message)
 
-                if ps[0] > math.pi:
-                    ps[0] -= math.pi
-                    ps[1] = 2*math.pi-ps[1]
+        ps = list(map(
+            map2domain, results.x
+        ))
 
-                self.set_params(ps)
-                break
+        if ps[0] > math.pi:
+            ps[0] -= math.pi
+            ps[1] = 2 * math.pi - ps[1]
 
-        self.validate_model()
+        self.set_params(ps)
+
+

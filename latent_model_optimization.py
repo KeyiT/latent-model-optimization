@@ -62,56 +62,69 @@ class LatentModelOptimizer(object):
     def functional_residual_square_jac(self, hidden_vars):
         return self.functional_jac(hidden_vars) * (self.functional(hidden_vars) - self.observe(self.params)) * 2
 
-    def optimize(self, method=None, jac=False, hes=None, bounds_params=None, bounds_hidden_vars=None, tol=1E-16, max_iter=100):
+    def train_optimize_with_smart_sampling(self, initia_params,
+                                           train_method='trf', optimize_method='Newton-CG',
+                                           train_jac=False, optimize_jac=False,
+                                           bounds_hidden_vars=(-np.inf, np.inf), bounds_params=None,
+                                           train_tol=1E-16, optimize_tol=1E-16,
+                                           max_iter=10):
+
+        observes_ = list()
+        sample_parameters = list()
+        sample_parameters.append(initia_params)
 
         for i in range(0, max_iter):
 
-            # estimate the model
-            if not jac:
-                results = least_squares(self.functional_residual, [0.5, 0.5],
-                                        verbose=2, method='dogbox', bounds=bounds_hidden_vars,
-                                        ftol=3e-16, xtol=3e-16, gtol=3e-16)
-            else:
-                results = least_squares(self.functional_residual, [0.5, 0.5], jac=self.functional_jac,
-                                        verbose=2, method='dogbox', bounds=bounds_hidden_vars,
-                                        ftol=3e-16, xtol=3e-16, gtol=3e-16)
+            observes_.append(self.observe(sample_parameters[-1]))
 
-            if not results.success:
-                print("model estimation warning: " + results.message)
-            self.hidden_vars = results.x
+            tmp_hidden_vars = list()
+            tmp_hidden_vars.append(self.hidden_vars)
+            self.train(sample_parameters=sample_parameters, init_guess_=tmp_hidden_vars, observes=observes_,
+                       method=train_method, jac=train_jac, bounds=bounds_hidden_vars, tol=train_tol)
 
             self.validate_model()
 
-            # minimize the estimated model
-            if not jac:
-                results = minimize(self.model, self.params, method=method, jac=False,
-                                   hess=hes, bounds=bounds_params, tol=1E-16)
-            else:
-                results = minimize(self.model, self.params, method=method, jac=self.model_jac,
-                                   hess=hes, bounds=bounds_params, tol=1E-16)
+            self.optimize(init_guess_=self.params, method=optimize_method,
+                          jac=optimize_jac,
+                          bounds=bounds_params, tol=optimize_tol)
+            sample_parameters.append(self.params)
 
-            if not results.success:
-                print("model minimization warning: " + results.message)
-            self.set_params(list(results.x))
-            print(str(i) + "th iteration: minimum is " + str(results.fun))
+            self.validate_model()
+
+            print(str(i) + "th iteration: minimum is " + str(self.model(self.params)))
 
             res = self.functional_residual_square(self.hidden_vars)
             print(str(i) + "th iteration: residual is " + str(res))
-            if res < tol:
-                pass
-                # break
 
             print(self.hidden_vars)
             print(self.params)
 
-            self.validate_model()
+    def train_optimize_with_batch_sampling(self, initial_hidden_vars, sample_params,
+                                           train_method='trf', optimize_method=None,
+                                           train_jac=False, optimize_jac=False,
+                                           bounds_hidden_vars=(-np.inf, np.inf), bounds_params=None,
+                                           train_tol=1E-16, optimize_tol=1E-16):
 
-    def train(self, sample_parameters, method=None, jac=False, bounds=None, max_iter=1, tol=1E-10):
+        self.train(sample_parameters=sample_params, init_guess_=initial_hidden_vars, observes=None,
+                   method=train_method, jac=train_jac, bounds=bounds_hidden_vars, tol=train_tol)
 
-        observes_ = list(map(
-            lambda sample: self.observe(list(sample)),
-            sample_parameters
-        ))
+        self.validate_model()
+
+        self.optimize(init_guess_=self.params, method=optimize_method,
+                      jac=optimize_jac,
+                      bounds=bounds_params, tol=optimize_tol)
+
+        self.validate_model()
+
+    def train(self, sample_parameters, init_guess_, observes=None, method=None, jac=False, bounds=None, tol=1E-10):
+
+        if observes is None:
+            observes_ = list(map(
+                lambda sample: self.observe(list(sample)),
+                sample_parameters
+            ))
+        else:
+            observes_ = observes
 
         def loss_function(hidden_vars):
             loss = []
@@ -131,33 +144,37 @@ class LatentModelOptimizer(object):
 
             return jac_
 
-        init_guess = [
-            [0.5, np.pi],
-            [0.1, np.pi*0.1],
-            [0.1, np.pi*1.8],
-            [0.9, np.pi*1.8],
-            [0.9, np.pi*0.1]
-        ]
-
         if not jac:
-            for ini in init_guess:
+            for ini in init_guess_:
                 results = least_squares(loss_function, ini,
                                     verbose=1, method=method, bounds=bounds, ftol=3e-16, xtol=3e-16, gtol=3e-16)
-                if results.success and np.sum(np.array(results.fun)) < 1E-7:
+                if results.success and np.sum(np.array(results.fun)) < tol:
                     self.hidden_vars = results.x
                     break
 
         else:
-            for ini in init_guess:
+            for ini in init_guess_:
                 print(ini)
                 results = least_squares(loss_function, ini,
                                         jac=loss_function_jac, verbose=1,
                                         method=method, bounds=bounds, ftol=3e-16, xtol=3e-16, gtol=3e-16)
-                if results.success and np.sum(np.array(results.fun)) < 1E-7:
+                if results.success and np.sum(np.array(results.fun)) < tol:
                     self.hidden_vars = results.x
                     break
 
-        self.validate_model()
+    def optimize(self, init_guess_, method=None, jac=False, bounds=None, tol=1E-16):
+        # minimize the estimated model
+        if not jac:
+            results = minimize(self.model, init_guess_, method=method,
+                               jac=False,
+                               bounds=bounds, tol=tol)
+        else:
+            results = minimize(self.model, init_guess_, method=method,
+                               jac=self.model_jac, hess=self.model_hes,
+                               bounds=bounds, tol=tol)
+
+        print(results.message())
+        self.set_params(results.x)
 
     def validate_model(self):
         pass
