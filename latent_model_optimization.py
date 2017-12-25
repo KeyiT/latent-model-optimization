@@ -96,9 +96,6 @@ class LatentModelOptimizer(object):
             res = self.functional_residual_square(self.hidden_vars)
             print(str(i) + "th iteration: residual is " + str(res))
 
-            print(self.hidden_vars)
-            print(self.params)
-
     def train_optimize_with_batch_sampling(self, initial_hidden_vars, sample_params,
                                            train_method='trf', optimize_method=None,
                                            train_jac=False, optimize_jac=False,
@@ -154,7 +151,6 @@ class LatentModelOptimizer(object):
 
         else:
             for ini in init_guess_:
-                print(ini)
                 results = least_squares(loss_function, ini,
                                         jac=loss_function_jac, verbose=1,
                                         method=method, bounds=bounds, ftol=3e-16, xtol=3e-16, gtol=3e-16)

@@ -20,8 +20,8 @@ class TestModel(MingLeiModel):
 target_hidden_vars = [0.95118778, 4]
 model = TestModel([0.5, np.pi], [0.5, np.pi])
 
-#model.smart_train_and_optimize()
-model.train_and_optimize([5, 5])
+model.smart_train_and_optimize()
+#model.train_and_optimize([5, 5])
 print("\nhidden variables:")
 print(model.hidden_vars)
 print("target hidden variables:")
